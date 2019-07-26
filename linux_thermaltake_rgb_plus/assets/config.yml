@@ -1,0 +1,67 @@
+controllers:
+  - unit: 1
+    type: g3
+    devices:
+      1: Riing Plus
+      2: Riing Plus
+      3: Riing Plus
+      4: Riing Plus
+      5: Riing Plus
+
+fan_manager:
+  # model: locked_speed
+  # speed: 40
+
+  # model: temp_target
+  # target: 35
+  # sensor_name: coretemp
+  # multiplier: 5
+
+  model: curve
+  points:
+    - [0, 0]
+    - [50, 30]
+    - [60, 80]
+    - [70, 100]
+  sensor_name: coretemp
+
+lighting_manager:
+  # model: alternating
+  # odd_rgb:
+    # r: 50
+    # g: 0
+    # b: 0
+  # even_rgb:
+    # r: 0
+    # g: 50
+    # b: 0
+
+  model: thermal
+
+  # model: flow
+
+  # model: spectrum
+
+  # model: ripple
+  # r: 50
+  # g: 0
+  # b: 0
+
+  # model: blink
+  # r: 50
+  # g: 0
+  # b: 0
+
+  # model: pulse
+  # r: 50
+  # g: 50
+  # b: 50
+
+  # model: per-led
+  # r: 50
+  # g: 50
+  # b: 0
+
+  # model: off-light
+
+  # speed: extreme
