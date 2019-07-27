@@ -30,7 +30,9 @@ class ThermaltakeController(ClassifiedObject):
         raise NotImplementedError
 
     def attach_device(self, port=None, dev=None):
+        dev.set_parent_controller(controller=self, port=port)
         self.devices[port] = dev
+
         return self.devices[port]
 
     def save_profile(self):

@@ -34,7 +34,7 @@ class ThermaltakeDaemon:
             for id, model in controller['devices'].items():
                 logger.debug(' configuring devices for controller %s: %s',
                              controller['type'], controller['unit'])
-                dev = ThermaltakeDevice.factory(model, self.controllers[controller['unit']], id)
+                dev = ThermaltakeDevice.factory(model)
                 self.controllers[controller['unit']].attach_device(id, dev)
                 self.register_attached_device(controller['unit'], id, dev)
 

@@ -11,18 +11,21 @@ FanSpeed = namedtuple('FanSpeed', ['get_speed', 'rpm'])
 class ThermaltakeDevice(ClassifiedObject):
     model = None
 
-    def __init__(self, controller, port: int):
-        self.port = int(port)
+    def __init__(self):
+        pass
+
+    def set_parent_controller(self, controller, port: int):
         self.controller = controller
+        self.port = port
 
     @classmethod
-    def factory(cls, model, controller=None, port=None):
+    def factory(cls, model):
         # NOTE: これがなにをしているのか?
         subclass_dict = {clazz.model.lower(): clazz for clazz in cls.inheritors()
                          if clazz.model is not None}
 
         try:
-            dev = subclass_dict[model.lower()](controller, port)
+            dev = subclass_dict[model.lower()]()
             logger.debug('created {} device'.format(dev.__class__.__name__))
             return dev
         except KeyError:
