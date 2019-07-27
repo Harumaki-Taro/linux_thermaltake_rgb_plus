@@ -45,12 +45,12 @@ class ThermaltakeG3Controller(ThermaltakeController):
         self.ports = 5
 
 
-# class ThermaltakeTTSync5Controller(ThermaltakeController):
-#     model = 'ttsync5'
-#
-#     def init(self):
-#         self.driver = drivers.ThermaltakeTTSync5ControllerDriverController
-#         self.ports = 5
+class ThermaltakeTTSync5Controller(ThermaltakeController):
+    model = 'ttsync5'
+
+    def init(self):
+        self.driver = drivers.ThermaltakeTTSync5ControllerDriver(self.unit)
+        self.ports = 5
 
 
 class ThermaltakeRiingTrioController(ThermaltakeController):
@@ -65,7 +65,8 @@ def controller_factory(unit_type=None, unit=1, **kwargs) -> ThermaltakeControlle
     if unit_type.lower() == 'g3':
         return ThermaltakeG3Controller(unit)
 
-#     elif unit_type.lower() == 'ttsync5'
+    elif unit_type.lower() == 'ttsync5':
+        return ThermaltakeTTSync5Controller(unit)
 
     elif unit_type.lower() == 'riingtrio':
         return ThermaltakeRiingTrioController(unit)

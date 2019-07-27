@@ -1,6 +1,6 @@
 controllers:
   - unit: 1
-    type: g3
+    type: ttsync5
     devices:
       1: Riing Plus
       2: Riing Plus

@@ -41,3 +41,11 @@ class TT_RGB_PLUS:
         PER_LED = 0x18      # requires COLORS list with LED_COUNT colors
         FULL = 0x19         # requires 1 COLORS
 
+    class COMMAND:
+        INIT = [0xfe, 0x33]                 # -> STATUS_BYTE  initilizes the controller
+        GET_FIRMWARE_VERSION = [0x33, 0x50] # -> [MAJOR, MINOR, PATCH]
+        SAVE_PROFILE = [0x32, 0x53]         # -> STATUS_BYTE Saves the RGB_MODE and SPEED
+        SET_SPEED = [0x32, 0x52]            # -> STATUS_BYTE
+        SET_RGB = [0x32, 0x52]              # -> STATUS_BYTE
+        GET_DATA = [0x33, 0x51]             # -> [PORT, UNKNOEN, DPEED, RPM_L, RPM_H]
+

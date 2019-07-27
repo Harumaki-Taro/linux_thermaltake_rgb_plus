@@ -1,5 +1,6 @@
 import usb
 from linux_thermaltake_rgb_plus import logger
+from linux_thermaltake_rgb_plus.globals import TT_RGB_PLUS
 
 
 class ThermaltakeControllerDriver:
@@ -111,9 +112,11 @@ class ThermaltakeControllerDriver:
     def read_in(self, length: int = 64) -> bytearray:
         return self.endpoint_in.read(length)
 
+    def get_firmware_version(self):
+        raise NotImplementedError
+
     def save_profile(self):
-        """****これは何?****"""
-        self.write_out([0x32, 0x53])
+        raise NotImplementedError
 
 
 class ThermaltakeG3ControllerDriver(ThermaltakeControllerDriver):
@@ -123,7 +126,31 @@ class ThermaltakeG3ControllerDriver(ThermaltakeControllerDriver):
         self.product_id = self.PRODUCT_ID_BASE + (unit - 1)
 
     def init_controller(self):
-        self.write_out([0xfe, 0x33])
+        self.write_out(TT_RGB_PLUS.COMMAND.INIT)
+
+    def get_firmware_version(self):
+        self.write_out(TT_RGB_PLUS.COMMAND.GET_FIRMWARE_VERSION)
+        return self.read_in()
+
+    def save_profile(self):
+        self.write_out(TT_RGB_PLUS.COMMAND.SAVE_PROFILE)
+
+
+class ThermaltakeTTSync5ControllerDriver(ThermaltakeControllerDriver):
+    PRODUCT_ID_BASE = 0x1fa5
+
+    def init(self, unit=1):
+        self.product_id = self.PRODUCT_ID_BASE + (unit - 1)
+
+    def init_controller(self):
+        self.write_out(TT_RGB_PLUS.COMMAND.INIT)
+
+    def get_firmware_version(self):
+        self.write_out(TT_RGB_PLUS.COMMAND.GET_FIRMWARE_VERSION)
+        return self.read_in()
+
+    def save_profile(self):
+        self.write_out(TT_RGB_PLUS.COMMAND.SAVE_PROFILE)
 
 
 class ThermaltakeRiingTrioControllerDriver(ThermaltakeG3ControllerDriver):
