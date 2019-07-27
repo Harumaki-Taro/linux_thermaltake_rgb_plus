@@ -17,7 +17,7 @@ fan_managers:
   # sensor_name: coretemp
   # multiplier: 5
   - setting: top
-    devices: {1: [1, 2, 3]}
+    devices: {1: [1, 2, 3, 4]}
     model: curve
     points:
       - [0, 0]
@@ -26,10 +26,17 @@ fan_managers:
       - [70, 100]
     sensor_name: coretemp
 
-  - setting: bellow
-    devices: {1: [4, 5]}
+  - setting: default
+    model: curve
+    points:
+      - [0, 0]
+      - [50, 30]
+      - [60, 80]
+      - [70, 100]
+
+  - setting: DefauLt
     model: locked_speed
-    speed: 40
+    speed: 50
 
 lighting_manager:
   # model: alternating

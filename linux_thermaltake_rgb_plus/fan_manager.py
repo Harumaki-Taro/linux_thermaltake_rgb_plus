@@ -134,7 +134,6 @@ class FanManager:
             self._model = model
 
     def _main_loop(self):
-        # NOTE: fanごとに別のmodelを使えるようにしたい
         last_speed = None
         while self._contine:
             speed = int(round(self._model.main()))

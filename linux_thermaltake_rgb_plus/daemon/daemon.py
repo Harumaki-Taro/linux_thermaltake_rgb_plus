@@ -43,19 +43,54 @@ class ThermaltakeDaemon:
         logger.debug('prepare fan managers')
         self.fan_managers = {}
 
+        rested_devices = list(self.attached_devices.keys())
+
         for fan_manager in self.config.fan_manager:
+            setting_name = fan_manager['setting']
+            if setting_name.lower() == 'default':
+                continue
+
             fan_model = FanModel.factory(fan_manager)
-            self.fan_managers[fan_manager['setting']] = FanManager(fan_model)
-            now_manager = self.fan_managers[fan_manager['setting']]
+            self.fan_managers[setting_name] = FanManager(fan_model)
+            now_manager = self.fan_managers[setting_name]
 
             for unit, ports in fan_manager['devices'].items():
                 for port in ports:
-                    print(f'{unit}:{port}')
-                    dev = self.attached_devices[f'{unit}:{port}']
+                    try:
+                        dev = self.attached_devices[f'{unit}:{port}']
+                    except KeyError as e:
+                        logger.error('device {unit}:{port} is not registered.')
+                        raise e
+
                     if isinstance(dev, devices.ThermaltakeFanDevice):
                         logger.debug('  registering %s with fan manager %s',
-                                     dev.model, fan_manager['setting'])
+                                     dev.model, setting_name)
                         now_manager.attach_device(dev)
+                        rested_devices.remove(f'{unit}:{port}')
+
+        for fan_manager in self.config.fan_manager:
+            setting_name = fan_manager['setting']
+            if setting_name.lower() != 'default':
+                continue
+            # 設定ファイル中に DEFAULT, Default, default など複数あった場合, 最後の設定が適用される
+            # ことになる.
+            setting_name = 'default'
+
+            fan_model = FanModel.factory(fan_manager)
+            self.fan_managers[setting_name] = FanManager(fan_model)
+            now_manager = self.fan_managers[setting_name]
+
+            for dev_unit_port in rested_devices:
+                try:
+                    dev = self.attached_devices[dev_unit_port]
+                except KeyError as e:
+                    logger.error('device {unit}:{port} is not registered.')
+                    raise e
+
+                if isinstance(dev, devices.ThermaltakeFanDevice):
+                    logger.debug('  registering %s with fan manager %s',
+                                 dev.model, setting_name)
+                    now_manager.attach_device(dev)
 
     def register_attached_device(self, unit, port, dev=None):
         if isinstance(dev, devices.ThermaltakeRGBDevice):
