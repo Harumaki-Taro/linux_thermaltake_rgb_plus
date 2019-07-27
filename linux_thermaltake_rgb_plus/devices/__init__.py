@@ -1,7 +1,7 @@
 from collections import namedtuple
 
 from linux_thermaltake_rgb_plus import logger
-from linux_thermaltake_rgb_plus.classified_object import ClassifiedObject
+from linux_thermaltake_rgb_plus import ClassifiedObject
 from linux_thermaltake_rgb_plus.globals \
     import PROTOCOL_SET, PROTOCOL_LIGHT, PROTOCOL_FAN, PROTOCOL_GET
 

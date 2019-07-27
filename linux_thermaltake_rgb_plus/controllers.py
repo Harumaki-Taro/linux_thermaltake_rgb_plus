@@ -1,5 +1,5 @@
 from linux_thermaltake_rgb_plus import drivers, logger
-from linux_thermaltake_rgb_plus.classified_object import ClassifiedObject
+from linux_thermaltake_rgb_plus import ClassifiedObject
 
 
 class ThermaltakeController(ClassifiedObject):
