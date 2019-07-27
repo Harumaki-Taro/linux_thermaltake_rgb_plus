@@ -9,15 +9,8 @@ controllers:
       5: Riing Plus
 
 fan_managers:
-  # model: locked_speed
-  # speed: 40
-
-  # model: temp_target
-  # target: 35
-  # sensor_name: coretemp
-  # multiplier: 5
   - setting: top
-    devices: {1: [1, 2, 3, 4]}
+    devices: {1: [1, 2, 3]}
     model: curve
     points:
       - [0, 0]
@@ -25,6 +18,11 @@ fan_managers:
       - [60, 80]
       - [70, 100]
     sensor_name: coretemp
+
+  - setting: back
+    devices: {1: [4,]}
+    model: locked_speed
+    speed: 40
 
   - setting: default
     model: curve

@@ -4,7 +4,7 @@ from threading import Thread
 from linux_thermaltake_rgb_plus.controllers import ThermaltakeController
 from linux_thermaltake_rgb_plus.fan_manager import FanModel, FanManager
 from linux_thermaltake_rgb_plus.daemon.config import Config
-from linux_thermaltake_rgb_plus.lighting_manager import LightingEffect
+from linux_thermaltake_rgb_plus.lighting_manager import LightingEffect, LightingManager
 from linux_thermaltake_rgb_plus import devices, logger
 from linux_thermaltake_rgb_plus.devices import ThermaltakeDevice
 
@@ -17,7 +17,8 @@ class ThermaltakeDaemon:
         self.config = Config()
 
         logger.debug('creating lighting manager')
-        self.lighting_manager = LightingEffect.factory(self.config.lighting_manager)
+        lighting_model = LightingEffect.factory(self.config.lighting_manager)
+        self.lighting_manager = LightingManager(lighting_model, 'default')
 
         self.attached_devices = {}
         self.controllers = {}
@@ -39,58 +40,64 @@ class ThermaltakeDaemon:
         self._thread = Thread(target=self._main_loop)
         self._continue = False
 
+    def _register_devices_to_manager(self, manager, unit_ports):
+        for unit_port in unit_ports:
+            try:
+                dev = self.attached_devices[unit_port]
+            except KeyError as e:
+                logger.error('device {unit_port} is not registered.')
+                raise e
+
+            if isinstance(dev, devices.ThermaltakeFanDevice):
+                logger.debug('  registering %s with fan manager %s',
+                             dev.model, manager._name)
+                manager.attach_device(dev)
+
+    def _convert_devicesDict_to_unit_ports(self, devices_dict):
+        unit_ports = []
+        for unit, ports in devices_dict.items():
+            for port in ports:
+                unit_ports.append(f'{unit}:{port}')
+
+        return unit_ports
+
     def prepare_fan_manager(self):
         logger.debug('prepare fan managers')
         self.fan_managers = {}
-
         rested_devices = list(self.attached_devices.keys())
 
+        # fan_managerを設定する
+        i = 0
+        default_num = None
         for fan_manager in self.config.fan_manager:
             setting_name = fan_manager['setting']
             if setting_name.lower() == 'default':
+                # default が複数あった場合, 最後に 'default'.lower() だったものを default として設定する.
+                default_num = i
+                i += 1
                 continue
 
             fan_model = FanModel.factory(fan_manager)
-            self.fan_managers[setting_name] = FanManager(fan_model)
-            now_manager = self.fan_managers[setting_name]
+            self.fan_managers[setting_name] = FanManager(fan_model, setting_name)
 
-            for unit, ports in fan_manager['devices'].items():
-                for port in ports:
-                    try:
-                        dev = self.attached_devices[f'{unit}:{port}']
-                    except KeyError as e:
-                        logger.error('device {unit}:{port} is not registered.')
-                        raise e
+            unit_ports = self._convert_devicesDict_to_unit_ports(fan_manager['devices'])
+            self._register_devices_to_manager(manager=self.fan_managers[setting_name],
+                                              unit_ports=unit_ports)
+            for unit_port in unit_ports:
+                rested_devices.remove(unit_port)
 
-                    if isinstance(dev, devices.ThermaltakeFanDevice):
-                        logger.debug('  registering %s with fan manager %s',
-                                     dev.model, setting_name)
-                        now_manager.attach_device(dev)
-                        rested_devices.remove(f'{unit}:{port}')
+            i += 1
 
-        for fan_manager in self.config.fan_manager:
-            setting_name = fan_manager['setting']
-            if setting_name.lower() != 'default':
-                continue
-            # 設定ファイル中に DEFAULT, Default, default など複数あった場合, 最後の設定が適用される
-            # ことになる.
-            setting_name = 'default'
+        # default fan manager を設定する.
+        if default_num is None:
+            logger.debug('default fan manager is not existed.')
+            raise KeyError
 
-            fan_model = FanModel.factory(fan_manager)
-            self.fan_managers[setting_name] = FanManager(fan_model)
-            now_manager = self.fan_managers[setting_name]
-
-            for dev_unit_port in rested_devices:
-                try:
-                    dev = self.attached_devices[dev_unit_port]
-                except KeyError as e:
-                    logger.error('device {unit}:{port} is not registered.')
-                    raise e
-
-                if isinstance(dev, devices.ThermaltakeFanDevice):
-                    logger.debug('  registering %s with fan manager %s',
-                                 dev.model, setting_name)
-                    now_manager.attach_device(dev)
+        default_fan_manager = self.config.fan_manager[default_num]
+        fan_model = FanModel.factory(default_fan_manager)
+        self.fan_managers['default'] = FanManager(fan_model, 'default')
+        self._register_devices_to_manager(manager=self.fan_managers['default'],
+                                          unit_ports=rested_devices)
 
     def register_attached_device(self, unit, port, dev=None):
         if isinstance(dev, devices.ThermaltakeRGBDevice):

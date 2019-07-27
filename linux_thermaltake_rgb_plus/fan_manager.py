@@ -117,17 +117,18 @@ class CurveModel(FanModel):
 
 
 class FanManager:
-    def __init__(self, initial_model: FanModel = None):
+    def __init__(self, initial_model: FanModel = None, name: str = None):
         self._continue = False
         self._thread = Thread(target=self._main_loop)
         self._devices = []
-        self._model = initial_model
+        self.set_model(initial_model)
+        self._name = name
         logger.debug(f'creating FanManager object: [Model: {initial_model}]')
 
     def attach_device(self, device):
         self._devices.append(device)
 
-    def set_controller(self, model: FanModel):
+    def set_model(self, model: FanModel):
         logger.debug(f'setting fan model: {model.__class__.__name__}')
         if isinstance(model, FanModel):
             logger.debug(f'SUCCESS: set fan model: {model.__class__.__name__}')
@@ -158,6 +159,6 @@ class FanManager:
 
     def stop(self):
         logger.info(f'Stopping fan manager...')
-        self._contune = False
+        self._continue = False
         self._thread.join()
 

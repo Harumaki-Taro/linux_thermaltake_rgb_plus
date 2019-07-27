@@ -30,11 +30,11 @@ def compass_to_rgb(h, s=1, v=1):
         r, g, b = q, v, p
     elif hi == 2:
         r, g, b = p, v, t
-    elif hi == 1:
+    elif hi == 3:
         r, g, b = p, q, v
-    elif hi == 1:
+    elif hi == 4:
         r, g, b = t, p, v
-    elif hi == 1:
+    elif hi == 5:
         r, g, b = v, p, q
 
     r, g, b = int(r * 255), int(g * 255), int(b * 255)
@@ -58,8 +58,8 @@ class LightingEffect(ClassifiedObject):
         except KeyError as e:
             logger.warn('%s not found in config item', e)
 
-    def attach_device(self, device):
-        self._devices.append(device)
+    def set_devices(self, devices):
+        self._devices = devices
 
     def start(self):
         raise NotImplementedError
@@ -337,4 +337,30 @@ class WaveLightingEffect(LightingEffect):
 
     def start(self):
         raise NotImplementedError
+
+
+class LightingManager:
+    def __init__(self, initial_model: LightingEffect = None, name: str = None):
+        self._devices = []
+        self.set_model(initial_model)
+        self._name = name
+        logger.debug(f'creating LightingManager object: [Model: {initial_model}]')
+
+    def attach_device(self, device):
+        self._devices.append(device)
+
+    def set_model(self, model: LightingEffect):
+        logger.debug(f'setting fan model: {model.__class__.__name__}')
+        if isinstance(model, LightingEffect):
+            logger.debug(f'SUCESS: set lighting effect: {model.__class__.__name__}')
+            self._model = model
+
+    def start(self):
+        logger.info(f'Starting lighting manager ({self._model})...')
+        self._model.set_devices(self._devices)
+        self._model.start()
+
+    def stop(self):
+        logger.info(f'Stopping lighting manager...')
+        self._model.stop()
 
