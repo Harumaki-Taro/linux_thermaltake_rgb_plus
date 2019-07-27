@@ -16,9 +16,9 @@ class ThermaltakeDaemon:
         logger.debug('loading config')
         self.config = Config()
 
-        logger.debug('creating lighting manager')
-        lighting_model = LightingEffect.factory(self.config.lighting_manager)
-        self.lighting_manager = LightingManager(lighting_model, 'default')
+        # logger.debug('creating lighting manager')
+        # lighting_model = LightingEffect.factory(self.config.lighting_manager)
+        # self.lighting_manager = LightingManager(lighting_model, 'default')
 
         self.attached_devices = {}
         self.controllers = {}
@@ -35,7 +35,13 @@ class ThermaltakeDaemon:
                 self.controllers[controller['unit']].attach_device(id, dev)
                 self.register_attached_device(controller['unit'], id, dev)
 
-        self.prepare_fan_manager()
+        # self.prepare_fan_manager()
+        self.fan_managers = self.prepare_manager(self.config.fan_manager,
+                                                 FanModel,
+                                                 FanManager)
+        self.lighting_managers = self.prepare_manager(self.config.lighting_manager,
+                                                      LightingEffect,
+                                                      LightingManager)
 
         self._thread = Thread(target=self._main_loop)
         self._continue = False
@@ -60,6 +66,44 @@ class ThermaltakeDaemon:
                 unit_ports.append(f'{unit}:{port}')
 
         return unit_ports
+
+    def prepare_manager(self, config_managers, Model, Manager):
+        managers = {}
+        rested_devices = list(self.attached_devices.keys())
+
+        # mageger を設定する
+        i = 0
+        default_num = None
+        for conf_mngr in config_managers:
+            setting_name = conf_mngr['setting']
+            if setting_name.lower() == 'default':
+                # default が config.yaml 中に複数ある場合, 最後に 'default'.lower() だったものを
+                # default として設定する.
+                default_num = i
+                i += 1
+                continue
+            model = Model.factory(conf_mngr)
+            managers[setting_name] = Manager(model, setting_name)
+
+            unit_ports = self._convert_devicesDict_to_unit_ports(conf_mngr['devices'])
+            self._register_devices_to_manager(manager=managers[setting_name],
+                                              unit_ports=unit_ports)
+            for unit_port in unit_ports:
+                rested_devices.remove(unit_port)
+            i += 1
+
+        # default manager を設定する.
+        if default_num is None:
+            logger.debug('default fan manager is not existed.')
+            raise KeyError
+
+        default_manager = config_managers[default_num]
+        model = Model.factory(default_manager)
+        managers['default'] = Manager(model, 'default')
+        self._register_devices_to_manager(manager=managers['default'],
+                                          unit_ports=rested_devices)
+
+        return managers
 
     def prepare_fan_manager(self):
         logger.debug('prepare fan managers')
@@ -100,9 +144,9 @@ class ThermaltakeDaemon:
                                           unit_ports=rested_devices)
 
     def register_attached_device(self, unit, port, dev=None):
-        if isinstance(dev, devices.ThermaltakeRGBDevice):
-            logger.debug('  refistering %s with lighting manager', dev.model)
-            self.lighting_manager.attach_device(dev)
+        # if isinstance(dev, devices.ThermaltakeRGBDevice):
+            # logger.debug('  refistering %s with lighting manager', dev.model)
+            # self.lighting_manager.attach_device(dev)
 
         self.attached_devices[f'{unit}:{port}'] = dev
 
@@ -113,7 +157,9 @@ class ThermaltakeDaemon:
         self._thread.start()
 
         logger.debug('starting lighting manager')
-        self.lighting_manager.start()
+        # self.lighting_manager.start()
+        for lighting_manager in self.lighting_managers.values():
+            lighting_manager.start()
 
         logger.debug('startig fan manager')
         # self.fan_manager.start()
@@ -125,7 +171,9 @@ class ThermaltakeDaemon:
         self._continue = False
 
         logger.debug('stopping lighting manager')
-        self.lighting_manager.stop()
+        # self.lighting_manager.stop()
+        for lighting_manager in self.lighting_managers.values():
+            lighting_manager.stop()
 
         logger.debug('stopping fan manager')
         # self.fan_manager.stop()

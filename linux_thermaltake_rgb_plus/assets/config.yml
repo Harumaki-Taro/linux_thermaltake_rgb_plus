@@ -46,8 +46,12 @@ lighting_manager:
     # r: 0
     # g: 50
     # b: 0
+  - setting: top
+    devices: {1: [1, 2, 3]}
+    model: thermal
 
-  model: thermal
+  - setting: default
+    model: flow
 
   # model: flow
 
