@@ -5,8 +5,8 @@ import math
 
 from psutil import sensors_temperatures
 
+from linux_thermaltake_rgb_plus import Model, Manager
 from linux_thermaltake_rgb_plus import logger, util
-from linux_thermaltake_rgb_plus.classified_object import ClassifiedObject
 from linux_thermaltake_rgb_plus.globals import TT_RGB_PLUS
 
 
@@ -42,7 +42,7 @@ def compass_to_rgb(h, s=1, v=1):
     return g, r, b
 
 
-class LightingEffect(ClassifiedObject):
+class LightingEffect(Model):
     model = None
 
     def __init__(self, config):
@@ -339,15 +339,10 @@ class WaveLightingEffect(LightingEffect):
         raise NotImplementedError
 
 
-class LightingManager:
+class LightingManager(Manager):
     def __init__(self, initial_model: LightingEffect = None, name: str = None):
-        self._devices = []
-        self.set_model(initial_model)
-        self._name = name
+        super().__init__(initial_model, name)
         logger.debug(f'creating LightingManager object: [Model: {initial_model}]')
-
-    def attach_device(self, device):
-        self._devices.append(device)
 
     def set_model(self, model: LightingEffect):
         logger.debug(f'setting fan model: {model.__class__.__name__}')

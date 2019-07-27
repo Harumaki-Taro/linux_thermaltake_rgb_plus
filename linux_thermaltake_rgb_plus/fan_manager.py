@@ -4,11 +4,11 @@ from threading import Thread
 import numpy as np
 from psutil import sensors_temperatures
 
+from linux_thermaltake_rgb_plus import Model, Manager
 from linux_thermaltake_rgb_plus import logger
-from linux_thermaltake_rgb_plus.classified_object import ClassifiedObject
 
 
-class FanModel(ClassifiedObject):
+class FanModel(Model):
     @classmethod
     def factory(cls, config):
         subclass_dict = {clazz.model: clazz for clazz in cls.inheritors()}
@@ -116,17 +116,12 @@ class CurveModel(FanModel):
         return f'curve {self.points}'
 
 
-class FanManager:
+class FanManager(Manager):
     def __init__(self, initial_model: FanModel = None, name: str = None):
+        super().__init__(initial_model, name)
         self._continue = False
         self._thread = Thread(target=self._main_loop)
-        self._devices = []
-        self.set_model(initial_model)
-        self._name = name
         logger.debug(f'creating FanManager object: [Model: {initial_model}]')
-
-    def attach_device(self, device):
-        self._devices.append(device)
 
     def set_model(self, model: FanModel):
         logger.debug(f'setting fan model: {model.__class__.__name__}')
