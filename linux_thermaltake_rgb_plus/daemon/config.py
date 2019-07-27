@@ -46,8 +46,8 @@ class Config:
         self.controllers = config.get('controllers')
         logger.debug(config.get('controllers'))
 
-        self.fan_manager = config.get('fan_manager')
-        logger.debug(config.get('fan_manager'))
+        self.fan_manager = config.get('fan_managers')
+        logger.debug(config.get('fan_managers'))
 
         self.lighting_manager = config.get('lighting_manager')
         logger.debug(config.get('lighting_manager'))

@@ -16,10 +16,6 @@ class ThermaltakeDaemon:
         logger.debug('loading config')
         self.config = Config()
 
-        logger.debug('creating fan manager')
-        fan_model = FanModel.factory(self.config.fan_manager)
-        self.fan_manager = FanManager(fan_model)
-
         logger.debug('creating lighting manager')
         self.lighting_manager = LightingEffect.factory(self.config.lighting_manager)
 
@@ -38,14 +34,30 @@ class ThermaltakeDaemon:
                 self.controllers[controller['unit']].attach_device(id, dev)
                 self.register_attached_device(controller['unit'], id, dev)
 
+        self.prepare_fan_manager()
+
         self._thread = Thread(target=self._main_loop)
         self._continue = False
 
-    def register_attached_device(self, unit, port, dev=None):
-        if isinstance(dev, devices.ThermaltakeFanDevice):
-            logger.debug('  registering %s with fan manager', dev.model)
-            self.fan_manager.attach_device(dev)
+    def prepare_fan_manager(self):
+        logger.debug('prepare fan managers')
+        self.fan_managers = {}
 
+        for fan_manager in self.config.fan_manager:
+            fan_model = FanModel.factory(fan_manager)
+            self.fan_managers[fan_manager['setting']] = FanManager(fan_model)
+            now_manager = self.fan_managers[fan_manager['setting']]
+
+            for unit, ports in fan_manager['devices'].items():
+                for port in ports:
+                    print(f'{unit}:{port}')
+                    dev = self.attached_devices[f'{unit}:{port}']
+                    if isinstance(dev, devices.ThermaltakeFanDevice):
+                        logger.debug('  registering %s with fan manager %s',
+                                     dev.model, fan_manager['setting'])
+                        now_manager.attach_device(dev)
+
+    def register_attached_device(self, unit, port, dev=None):
         if isinstance(dev, devices.ThermaltakeRGBDevice):
             logger.debug('  refistering %s with lighting manager', dev.model)
             self.lighting_manager.attach_device(dev)
@@ -62,7 +74,9 @@ class ThermaltakeDaemon:
         self.lighting_manager.start()
 
         logger.debug('startig fan manager')
-        self.fan_manager.start()
+        # self.fan_manager.start()
+        for fan_manager in self.fan_managers.values():
+            fan_manager.start()
 
     def stop(self):
         logger.debug('recieved exit command')
@@ -72,7 +86,9 @@ class ThermaltakeDaemon:
         self.lighting_manager.stop()
 
         logger.debug('stopping fan manager')
-        self.fan_manager.stop()
+        # self.fan_manager.stop()
+        for fan_manager in self.fan_managers.values():
+            fan_manager.stop()
 
         logger.debug('stopping main thread')
         self._thread.join()
