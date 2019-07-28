@@ -30,7 +30,7 @@ class TempTargetModel(FanModel):
     def __init__(self, config):
         self.sensor_name = config.get('sensor_name', 'coretemp')
         self.target = float(config.get('target'))
-        self.multiplier = config.get('multiplier')
+        self.multiplier = config.get('multiplier', 5)
         self.last_speed = 10
 
     def main(self):

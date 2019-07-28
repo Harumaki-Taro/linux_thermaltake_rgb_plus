@@ -9,8 +9,8 @@ controllers:
       5: Riing Plus
 
 fan_managers:
-  - setting: top
-    devices: {1: [1, 2, 3]}
+  - setting: back
+    devices: {1: [3, 4]}
     model: curve
     points:
       - [0, 0]
@@ -19,64 +19,28 @@ fan_managers:
       - [70, 100]
     sensor_name: coretemp
 
-  - setting: back
-    devices: {1: [4,]}
-    model: locked_speed
-    speed: 40
-
-  - setting: default
-    model: curve
-    points:
-      - [0, 0]
-      - [50, 30]
-      - [60, 80]
-      - [70, 100]
+  - setting: top
+    devices: {1: [1, 2]}
+    model: temp_target
+    target: 40
+    multiplier: 5
 
   - setting: DefauLt
     model: locked_speed
     speed: 50
 
 lighting_manager:
-  # model: alternating
-  # odd_rgb:
-    # r: 50
-    # g: 0
-    # b: 0
-  # even_rgb:
-    # r: 0
-    # g: 50
-    # b: 0
-  - setting: top
-    devices: {1: [1, 2, 3]}
-    model: thermal
+  - setting: bellow
+    devices: {1: [4, 5]}
+    model: wave
+    speed: extreme
+    grb: [40, 40, 0]
+    grbs: [[40, 0, 0], [30, 10, 0], [20, 20, 0], [10, 30, 0], [0, 40, 0], [0, 30, 10], [0, 20, 20], [0, 10, 30], [0, 0, 40], [10, 0, 30], [20, 0, 20], [30, 0, 10]]
 
   - setting: default
-    model: flow
+    model: thermal
+    cold: 30
+    hot: 65
+    target: 45
+    sensor_name: coretemp
 
-  # model: flow
-
-  # model: spectrum
-
-  # model: ripple
-  # r: 50
-  # g: 0
-  # b: 0
-
-  # model: blink
-  # r: 50
-  # g: 0
-  # b: 0
-
-  # model: pulse
-  # r: 50
-  # g: 50
-  # b: 50
-
-  # model: per-led
-  # r: 50
-  # g: 50
-  # b: 0
-
-  # model: off-light
-
-  # speed: extreme

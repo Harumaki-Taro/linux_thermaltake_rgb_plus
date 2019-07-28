@@ -219,22 +219,38 @@ class OffLightingEffect(LightingEffect):
             dev.set_lighting(mode=TT_RGB_PLUS.RGB_MODE.FULL, speed=0x00, values=[0, 0, 0])
 
 
-class PerLEDLightingEffect(LightingEffect):
+class ColorsLightingEffect(LightingEffect):
+    def _set_per_led(self, mode, speed=0x00):
+        if 'grbs' in self._config.keys():
+            grbs = self._config['grbs']
+            for dev in self._devices:
+                if len(grbs) != dev.num_leds:
+                    print('The length of rgbs is not equal to'
+                          ' the number of LED lights in the debice.')
+                    raise ValueError
+
+            values = list(util.flatten_list(grbs))
+            for dev in self._devices:
+                dev.set_lighting(mode=mode, speed=speed, values=values)
+
+        elif 'grb' in self._config.keys():
+            grb = self._config['grb']
+            for dev in self._devices:
+                values = list(util.flatten_list(grb * dev.num_leds))
+                dev.set_lighting(mode=mode, speed=speed, values=values)
+        else:
+            logger.warn('grb config is not existed.')
+            raise ValueError            # NOTE: 正しいErrorにする
+
+
+class PerLEDLightingEffect(ColorsLightingEffect):
     # TODO: per-led config
     # TODO: design a neat way to set this up via config (surely theres a better way than a massive
     # array)
     model = 'per-led'
 
     def start(self):
-        try:
-            g, r, b = self._config['g'], self._config['r'], self._config['b']
-        except KeyError as e:
-            logger.warn('%s not found in config item: lighting_controller', e)
-            return
-
-        for dev in self._devices:
-            values = list(util.flatten_list([g, r, b] * dev.num_leds))
-            dev.set_lighting(mode=TT_RGB_PLUS.RGB_MODE.FULL, speed=0x00, values=values)
+        self._set_per_led(mode=TT_RGB_PLUS.RGB_MODE.PER_LED)
 
 
 class FlowLightingEffect(LightingEffect):
@@ -263,7 +279,7 @@ class SpectrumLightEffect(LightingEffect):
             dev.set_lighting(mode=TT_RGB_PLUS.RGB_MODE.SPECTRUM, speed=self._speed)
 
 
-class RippleLightingEffect(LightingEffect):
+class RippleLightingEffect(ColorsLightingEffect):
     """
     ::: settings: [speed, r, g, b]
     """
@@ -282,7 +298,7 @@ class RippleLightingEffect(LightingEffect):
             dev.set_lighting(mode=TT_RGB_PLUS.RGB_MODE.RIPPLE, speed=self._speed, values=[g, r, b])
 
 
-class BlinkLightingEffect(LightingEffect):
+class BlinkLightingEffect(ColorsLightingEffect):
     # TODO: per-led config
     # TODO: design a neat way to set this up via config (surely theres a better way then a massive
     # array)
@@ -293,19 +309,10 @@ class BlinkLightingEffect(LightingEffect):
 
     def start(self):
         self._speed = TT_RGB_PLUS.RGB_SPEED.convert(self._config.get('speed', 'EXTREME'))
-
-        try:
-            g, r, b = self._config['g'], self._config['r'], self._config['b']
-        except KeyError as e:
-            logger.warn('%s not found in config item: lighting_controller', e)
-            return
-
-        for dev in self._devices:
-            values = list(util.flatten_list([g, r, b] * dev.num_leds))
-            dev.set_lighting(mode=TT_RGB_PLUS.RGB_MODE.BLINK, speed=self._speed, values=values)
+        self._set_per_led(mode=TT_RGB_PLUS.RGB_MODE.BLINK, speed=self._speed)
 
 
-class PulseLightingEffect(LightingEffect):
+class PulseLightingEffect(ColorsLightingEffect):
     # TODO: per-led config
     # TODO: design a neat way to set this up via config (surely theres a better way then a massive
     # array)
@@ -316,27 +323,22 @@ class PulseLightingEffect(LightingEffect):
 
     def start(self):
         self._speed = TT_RGB_PLUS.RGB_SPEED.convert(self._config.get('speed', 'EXTREME'))
-
-        try:
-            g, r, b = self._config['g'], self._config['r'], self._config['b']
-        except KeyError as e:
-            logger.warn('%s not found in config item: lighting_controller', e)
-            return
-
-        for dev in self._devices:
-            values = list(util.flatten_list([g, r, b] * dev.num_leds))
-            dev.set_lighting(mode=TT_RGB_PLUS.RGB_MODE.PULSE, speed=self._speed, values=values)
+        self._set_per_led(mode=TT_RGB_PLUS.RGB_MODE.PULSE, speed=self._speed)
 
 
-class WaveLightingEffect(LightingEffect):
+class WaveLightingEffect(ColorsLightingEffect):
     # TODO: per-led config
     # TODO: design a neat way to set this up via config (surely theres a better way then a massive
     # array)
     # TODO:
-    mode = 'wave'
+    """
+    ::: setting: [speed, r, g, b]
+    """
+    model = 'wave'
 
     def start(self):
-        raise NotImplementedError
+        self._speed = TT_RGB_PLUS.RGB_SPEED.convert(self._config.get('speed', 'EXTREME'))
+        self._set_per_led(mode=TT_RGB_PLUS.RGB_MODE.WAVE, speed=self._speed)
 
 
 class LightingManager(Manager):
