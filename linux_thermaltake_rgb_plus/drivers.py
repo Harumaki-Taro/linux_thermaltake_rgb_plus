@@ -1,4 +1,5 @@
 import usb
+
 from linux_thermaltake_rgb_plus import logger
 from linux_thermaltake_rgb_plus.globals import TT_RGB_PLUS
 

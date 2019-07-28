@@ -144,10 +144,6 @@ class ThermaltakeDaemon:
                                           unit_ports=rested_devices)
 
     def register_attached_device(self, unit, port, dev=None):
-        # if isinstance(dev, devices.ThermaltakeRGBDevice):
-            # logger.debug('  refistering %s with lighting manager', dev.model)
-            # self.lighting_manager.attach_device(dev)
-
         self.attached_devices[f'{unit}:{port}'] = dev
 
     def run(self):
@@ -157,12 +153,10 @@ class ThermaltakeDaemon:
         self._thread.start()
 
         logger.debug('starting lighting manager')
-        # self.lighting_manager.start()
         for lighting_manager in self.lighting_managers.values():
             lighting_manager.start()
 
         logger.debug('startig fan manager')
-        # self.fan_manager.start()
         for fan_manager in self.fan_managers.values():
             fan_manager.start()
 
@@ -171,12 +165,10 @@ class ThermaltakeDaemon:
         self._continue = False
 
         logger.debug('stopping lighting manager')
-        # self.lighting_manager.stop()
         for lighting_manager in self.lighting_managers.values():
             lighting_manager.stop()
 
         logger.debug('stopping fan manager')
-        # self.fan_manager.stop()
         for fan_manager in self.fan_managers.values():
             fan_manager.stop()
 
