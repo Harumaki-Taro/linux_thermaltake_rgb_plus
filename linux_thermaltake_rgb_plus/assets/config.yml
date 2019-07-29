@@ -14,7 +14,7 @@ fan_managers:
     model: curve
     points:
       - [0, 0]
-      - [50, 30]
+      - [40, 30]
       - [60, 80]
       - [70, 100]
     sensor_name: coretemp
@@ -25,7 +25,7 @@ fan_managers:
     target: 40
     multiplier: 5
 
-  - setting: DefauLt
+  - setting: default
     model: locked_speed
     speed: 50
 

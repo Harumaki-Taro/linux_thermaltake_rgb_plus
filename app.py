@@ -7,7 +7,7 @@ from linux_thermaltake_rgb_plus.daemon.daemon import ThermaltakeDaemon
 
 
 def main():
-    logging.basicConfig(level=logging.DEBUG,
+    logging.basicConfig(level=logging.INFO,
                         format='%(asctime)s %(levelname)s %(name)s %(funcName)s :%(message)s',
                         filename='/tmp/linux_thermaltake_rgb_plus/logger.log')
 
