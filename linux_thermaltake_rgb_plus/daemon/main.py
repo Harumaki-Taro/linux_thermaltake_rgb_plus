@@ -2,7 +2,7 @@ import logging
 import sys
 
 from linux_thermaltake_rgb_plus import DEBUG
-from linux_thermaltake_rgb_plus import ThermaltakeDaemon
+from linux_thermaltake_rgb_plus.daemon.daemon import ThermaltakeDaemon
 
 
 def main():

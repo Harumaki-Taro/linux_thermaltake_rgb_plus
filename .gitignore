@@ -1,3 +1,6 @@
 */__pycache__/
 */*/__pycache__/
 __init__.pyc
+build/
+dist/
+thermaltake_rgb_plus.egg-info/

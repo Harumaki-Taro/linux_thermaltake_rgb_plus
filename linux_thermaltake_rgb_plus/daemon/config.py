@@ -6,7 +6,7 @@ from linux_thermaltake_rgb_plus import logger
 
 
 class Config:
-    abs_config_dir = '/etc/linux_Thermaltake_rgb_plus'
+    abs_config_dir = '/etc/linux_thermaltake_rgb_plus'
     rel_config_dir = 'linux_thermaltake_rgb_plus/assets'
     config_file_name = 'config.yml'
 
@@ -23,7 +23,8 @@ class Config:
             if os.path.isfile(os.path.join(self.rel_config_dir, self.config_file_name)):
                 self.config_dir = self.rel_config_dir
         else:
-            raise Exception('No config file found')
+
+            raise Exception(f'{os.path.isdir(self.abs_config_dir)}: No config file found')
 
         config = self.load_config()
         self.parse_config(config)
