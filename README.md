@@ -1,4 +1,6 @@
 ## How To Use
+0. `sudo pip numpy, pyusb, psutil, pyyaml` する.
+
 1. /optにディレクトリごと配置する.
 ```
 sudo cp linux_thermaltake_rgb_plus/ /opt/
