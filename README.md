@@ -1,9 +1,14 @@
 ## このプログラムについて
 このプログラムはthermaltake製の Riing Plus RGB Radiator Fan の点灯色を制御する常駐プログラムです。
+
 wave, pulse, spectrum などの点灯モードやCPU温度依存の点灯色変化をymlファイルから指定できます。
+
 製品ページ：https://jp.thermaltake.com/riing-plus-14-rgb-radiator-fan-tt-premium-edition-5-fan-pack.html
+
 参考にしたプログラムなど：
+
   https://github.com/chestm007/linux_thermaltake_riing
+
   https://github.com/MoshiMoshi0/ttrgbplusapi
 
 
